@@ -2,7 +2,7 @@
 #define CAPSTONE_ENGINE_H
 
 /* Capstone Disassembly Engine */
-/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2014 */
+/* By Nguyen Anh Quynh <aquynh@gmail.com>, 2013-2016 */
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,9 +34,9 @@ extern "C" {
 #endif
 #else
 #define CAPSTONE_API
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(CAPSTONE_STATIC)
 #define CAPSTONE_EXPORT __attribute__((visibility("default")))
-#else
+#else    // defined(CAPSTONE_STATIC)
 #define CAPSTONE_EXPORT
 #endif
 #endif
@@ -53,6 +53,11 @@ extern "C" {
 // Capstone API version
 #define CS_API_MAJOR 3
 #define CS_API_MINOR 0
+
+// Capstone package version
+#define CS_VERSION_MAJOR CS_API_MAJOR
+#define CS_VERSION_MINOR CS_API_MINOR
+#define CS_VERSION_EXTRA 5
 
 // Macro to create combined version which can be compared to
 // result of cs_version() API.

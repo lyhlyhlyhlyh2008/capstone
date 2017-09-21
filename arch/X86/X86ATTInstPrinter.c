@@ -676,7 +676,7 @@ static void printMemReference(MCInst *MI, unsigned Op, SStream *O)
 	MCOperand *DispSpec = MCInst_getOperand(MI, Op + X86_AddrDisp);
 	MCOperand *SegReg = MCInst_getOperand(MI, Op + X86_AddrSegmentReg);
 	uint64_t ScaleVal;
-	int reg;
+	int segreg;
 
 	if (MI->csh->detail) {
 		MI->flat_insn->detail->x86.operands[MI->flat_insn->detail->x86.op_count].type = X86_OP_MEM;
@@ -689,11 +689,11 @@ static void printMemReference(MCInst *MI, unsigned Op, SStream *O)
 	}
 
 	// If this has a segment register, print it.
-	reg = MCOperand_getReg(SegReg);
-	if (reg) {
+	segreg = MCOperand_getReg(SegReg);
+	if (segreg) {
 		_printOperand(MI, Op + X86_AddrSegmentReg, O);
 		if (MI->csh->detail) {
-			MI->flat_insn->detail->x86.operands[MI->flat_insn->detail->x86.op_count].mem.segment = reg;
+			MI->flat_insn->detail->x86.operands[MI->flat_insn->detail->x86.op_count].mem.segment = segreg;
 		}
 
 		SStream_concat0(O, ":");
@@ -728,7 +728,8 @@ static void printMemReference(MCInst *MI, unsigned Op, SStream *O)
 				}
 			}
 		} else {
-			SStream_concat0(O, "0");
+			if (segreg)
+				SStream_concat0(O, "0");
 		}
 	}
 
@@ -798,6 +799,15 @@ void X86_ATT_printInst(MCInst *MI, SStream *OS, void *info)
 		cs_mem_free(mnem);
 	else
 		printInstruction(MI, OS, info);
+
+	// HACK TODO: fix this in machine description
+	switch(MI->flat_insn->id) {
+		default: break;
+		case X86_INS_SYSEXIT:
+				 SStream_Init(OS);
+				 SStream_concat0(OS, "sysexit");
+				 break;
+	}
 
 	if (MI->has_imm) {
 		// if op_count > 1, then this operand's size is taken from the destination op
